@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <style type="text/css">
+        .container {
+            width: 700px;
+            margin: 0 auto;
+        }
+
+        .head {
+            padding: 10px 20px;
+            border: solid 1px #3b7be6;
+        }
+
+        .head span {
+            margin-right: 30px;
+        }
+
+        .head select {
+            width: 200px;
+            height: 30px;
+            border: solid 1px #3b7be6;
+            margin-right: 5px;
+        }
+
+        .search_btn {
+            padding: 5px 20px;
+            border: solid 1px #3b7be6;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .search_btn:hover {
+            background: #3b7be6;
+            color: #fff;
+        }
+
+        .search_btn:active {
+            background: #005be6;
+        }
+
+        table {
+            width: 700px;
+            border: solid 1px #3b7be6;
+            text-align: center;
+            border-top: none;
+        }
+
+        table tr {
+            height: 45px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="head">
+        <select name="year" id="year">
+            <option value="0">请选择</option>
+        </select>
+        <span>年</span>
+        <select name="month" id="month">
+            <option value="0">请选择</option>
+            <option value="1">1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+            <option value="4">4</option>
+            <option value="5">5</option>
+            <option value="6">6</option>
+            <option value="7">7</option>
+            <option value="8">8</option>
+            <option value="9">9</option>
+            <option value="10">10</option>
+            <option value="11">11</option>
+            <option value="12">12</option>
+        </select>
+        <span>月</span>
+        <button class="search_btn" id="search_btn">查询</button>
+    </div>
+    <table>
+        <tr>
+            <td>日</td>
+            <td>一</td>
+            <td>二</td>
+            <td>三</td>
+            <td>四</td>
+            <td>五</td>
+            <td>六</td>
+        </tr>
+        <tbody id="table"></tbody>
+    </table>
+</div>
+<script type="text/javascript">
+    var oDom = {
+        sYear: document.getElementById('year'),
+        sMonth: document.getElementById('month'),
+        searchBtn: document.getElementById('search_btn'),
+        table: document.getElementById('table')
+    };
+    /*定义公共工具类*/
+    var tools = {
+        eachFun: function (num, total, callback) {
+            for (var i = num; i < (num + total); i++) {
+                callback(i);
+            }
+        }
+    };
+    //把年份通过for循环的方法放入到select中
+    tools.eachFun(1900, 151, function (i) {
+        var opt = document.createElement('option');
+        opt.value = i;
+        opt.text = i;
+        oDom.sYear.appendChild(opt);
+    });
+    //初始化 展示今天的日历
+    window.onload = function (ev) {
+        init();
+    };
+    //查询
+    oDom.searchBtn.onclick = function (ev) {
+        var yIndex = oDom.sYear.selectedIndex;
+        var mIndex = oDom.sMonth.selectedIndex;
+        var year = oDom.sYear.options[yIndex].value;
+        var month = oDom.sMonth.options[mIndex].value;
+        var dayLenght = monthDay(year, month);//这个月有多少天
+        var day = (new Date(year, month - 1)).getDay();//第一天是星期几
+        pushDay(day,dayLenght);
+    };
+    //查询这个月有多少天
+    function monthDay(y, m) {
+        var monthDayArr = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+        //润年的计算规则
+        //非世纪年 能整除4
+        //世纪年 能被400整除
+        if ((y % 100) == 0 && (y % 400) == 0) {
+            //闰年
+            monthDayArr[1] = 29;
+        }
+        if ((y % 100) != 0 && (y % 4) == 0) {
+            //闰年
+            monthDayArr[1] = 29;
+        }
+        return monthDayArr[m - 1];
+    }
+    //把日期放入table中
+    function pushDay(day,dayLenght) {
+        if (day == 0) {
+            var html = '<tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>';
+            html += '<tr>';
+            tools.eachFun(1, dayLenght, function (i) {
+                html += '<td>' + i + '</td>';
+                if ((i % 7) == 0 || i == dayLenght) {
+                    html += '</tr>';
+                }
+            });
+            oDom.table.innerHTML = html;
+        } else {
+            var html = '';
+            html += '<tr>';
+            tools.eachFun(1, dayLenght + day, function (i) {
+                if ((day + 1) <= i) {
+                    html += '<td>' + (i - day) + '</td>';
+                    if ((i % 7) == 0 || i == dayLenght + day + 1) {
+                        html += '</tr>';
+                    }
+                } else {
+                    html += '<td></td>';
+                }
+
+            });
+            oDom.table.innerHTML = html;
+        }
+    }
+    //初始化
+    function init() {
+        var today = new Date();
+        var year = today.getFullYear();
+        var month = today.getMonth() + 1;
+        var dayLenght = monthDay(year, month);//这个月有多少天
+        var day = today.getDay();
+        pushDay(day,dayLenght);
+    }
+</script>
+</body>
+</html>
